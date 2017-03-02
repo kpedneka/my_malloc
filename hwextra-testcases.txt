@@ -1,0 +1,712 @@
+INPUT TEST1.C
+  printf("The purpose of this test is to just see that it can allocate multiple small blocks of data. Pay attention to addresses\n");
+  char * ptr = (char *) malloc(sizeof(char)*8);
+  strcpy(ptr, "hello");
+  printf("%s\n",ptr);
+
+  int * ptr1 = (int *) malloc(sizeof(int));
+  *ptr1 = 17;
+  printf("%d\n", *ptr1);
+
+  char *ptr2 = (char *)malloc(sizeof(char)*24);
+  strcpy(ptr2, "hey this is 24 chars  ");
+  printf("%s\n",ptr2);
+
+  char *ptr3 = (char *)malloc(sizeof(char)*14);
+  strcpy(ptr3, "I'm bored");
+  printf("%s\n",ptr3);
+
+  free(ptr3);
+  free(ptr1);
+  free(ptr);
+  free(ptr2);
+
+
+OUTPUT TEST1.C
+       The purpose of this test is to just see that it can allocate multiple small blocks of data. Pay attention to addresses
+
+       malloced new pointer at address 0x103ecf030 with size 8
+       hello
+
+       malloced new pointer at address 0x103ecf059 with size 4
+       17
+
+       malloced new pointer at address 0x103ecf07e with size 24
+       hey this is 24 chars  
+
+       malloced new pointer at address 0x103ecf0b7 with size 14
+       I'm bored
+
+       we have successfully freed memEntry at 0x103ecf0b7
+       we have successfully freed memEntry at 0x103ecf059
+       we have successfully freed memEntry at 0x103ecf030
+       we have successfully freed memEntry at 0x103ecf07e
+
+
+
+
+
+
+
+
+INPUT TEST2.C
+  printf("The purpose of this test is to check if free handles double free or freeing something that was not malloced\n");
+  char * ptr = (char *)malloc(sizeof(char)*25);
+  
+  int * ptr1 = (int *)malloc(sizeof(int));
+
+  char * ptr2 = (char *)malloc(5001);
+  free(ptr2);
+  free(ptr1);
+  free(ptr);
+
+  int * ptr3 = (int *)malloc(sizeof(int));
+  *ptr3 = 6;
+  free(ptr3);
+  free(ptr3);
+
+  char array[23] = "hello there";
+  free(array);
+
+OUTPUT TEST2.C
+       The purpose of this test is to check if free handles double free or freeing something that was not malloced
+
+       malloced new pointer at address 0x10f0df040 with size 25
+       malloced new pointer at address 0x10f0df07a with size 4
+
+       User requested size 5001 bytes exceeds max capacity of 5000 bytes from line 14 in file test2.c
+       User tried to free a NULL pointer at line 15 in file test2.c
+
+       we have successfully freed memEntry at 0x10f0df07a
+       we have successfully freed memEntry at 0x10f0df040
+
+       malloced new pointer at address 0x10f0df040 with size 4
+
+       we have successfully freed memEntry at 0x10f0df040
+       User tried an illegal free at line 22 in file test2.c
+
+       User tried to free pointer that was not allocated by mymalloc at line 25 in file test2.c
+
+
+
+
+
+
+
+
+
+
+
+
+INPUT TEST3.C
+  printf("The purpose of this test is to see if malloc allocates the proper space for arrays, we print values to make sure that it's all ok\n");
+  int *ptr1 = (int *) malloc(sizeof(int)*2);
+  ptr1[0] = 123;
+  ptr1[1] = 456;
+
+  printf("values of this array are %d %d\n", ptr1[0], ptr1[1]);
+
+  int *ptr2 = (int *) malloc(sizeof(int));
+  *ptr2 = 789;
+
+  int *ptr = (int *) malloc(sizeof(int)*8);
+  int i;
+  for (i = 0; i < 8; i++)
+    {
+      ptr[i] = i;
+    }
+  printf("values of this array are");
+  for (i = 0; i < 8; i++)
+    {
+      printf(" %d",ptr[i]);
+    }
+  printf("\n");
+
+  int *ptr3 = (int *) malloc(sizeof(int)*3);
+  ptr[0] = 101112;
+  ptr[1] = 131415;
+  ptr[2] = 161718;
+  printf("values of this array are");
+  for (i = 0; i < 3; i++)
+    {
+      printf(" %d",ptr[i]);
+    }
+  printf("\n");
+
+
+  free(ptr3);
+  free(ptr2);
+  free(ptr);
+  free(ptr1);
+
+
+OUTPUT TEST3.C
+       The purpose of this test is to see if malloc allocates the proper space for arrays, we print values to make sure that it's all ok
+       
+       malloced new pointer at address 0x105989030 with size 8
+       values of this array are 123 456
+
+       malloced new pointer at address 0x105989059 with size 4
+       malloced new pointer at address 0x10598a377 with size 32
+       
+       values of this array are 0 1 2 3 4 5 6 7
+       
+       malloced new pointer at address 0x1059894f9 with size 12
+       
+       values of this array are 101112 131415 161718
+       
+       we have successfully freed memEntry at 0x1059894f9
+       we have successfully freed memEntry at 0x105989059
+       we have successfully freed memEntry at 0x10598a377
+       we have successfully freed memEntry at 0x105989030
+
+
+
+
+
+
+
+
+INPUT TEST4.C
+  printf("The purpose of this test is to see if we can make linked lists with our malloc function, are all the memory addresses correct?\n");
+  struct random *ptr = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr->someArr, "PTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our [THAT WAS JUST A 400 BYTE STRING]");
+  int i;
+  for (i = 0; i < 20; i++)
+    {
+      ptr->anotherArr[i] = i*10;
+    }
+
+  struct random *ptr1 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr1->someArr, "PTR 1: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr1->anotherArr[i] = i*10;
+    }
+
+  struct random *ptr2 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr2->someArr, "PTR 2: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr2->anotherArr[i] = i*10;
+    }
+
+  struct random *ptr3 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr3->someArr, "PTR 3: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr3->anotherArr[i] = i*10;
+    }
+
+  ptr->next = ptr1;
+  ptr1->next = ptr2;
+  ptr2->next = ptr3;
+  ptr3->next = NULL;
+
+  struct random *ptr4 = ptr;
+  i = 0;
+  while (ptr4 != NULL)
+    {
+      printf("Printing values for ptr%d\n at address %p", i, ptr4);
+      printf("%s\n", ptr4->someArr);
+      int j;
+      for (j = 0; j < 20; j++)
+      {
+        printf("%d ", ptr4->anotherArr[j]);
+	}
+      printf("\n\n");
+      ptr4 = ptr4->next;
+      i++;
+    }
+
+  printf("%ld\n",sizeof(struct random));
+  free(ptr3);
+  free(ptr2);
+  free(ptr1);
+  free(ptr);
+  free(ptr4);
+
+OUTPUT TEST4.C
+       The purpose of this test is to see if we can make linked lists with our malloc function, are all the memory addresses correct?
+
+       malloced new pointer at address 0x10c2a41af with size 488
+       malloced new pointer at address 0x10c2a3fa6 with size 488
+       malloced new pointer at address 0x10c2a3d9d with size 488
+       malloced new pointer at address 0x10c2a3b94 with size 488
+
+       Printing values for ptr0
+       		at address 0x10c2a41d0PTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our [THAT WAS JUST A 400 BYTE STRING]
+0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+       Printing values for ptr1
+       at address 0x10c2a3fc7PTR 1: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+       0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+       Printing values for ptr2
+       at address 0x10c2a3dbePTR 2: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+       0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+       Printing values for ptr3
+       at address 0x10c2a3bb5PTR 3: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+       0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+       we have successfully freed memEntry at 0x10c2a3b94
+       we have successfully freed memEntry at 0x10c2a3d9d
+       we have successfully freed memEntry at 0x10c2a3fa6
+       we have successfully freed memEntry at 0x10c2a41af
+
+       User tried to free a NULL pointer at line 71 in file test4.c
+
+
+
+
+
+
+
+
+INPUT TEST5.C
+  printf("The purpose of this test is to see if malloc will create a new memEntry because we are freeing \nsomething of sizeof(struct random)*5 but and then hope to allocate something of sizeof(struct random)*4 \nso there is free space in this reused block of size of the difference between the two\n");
+  struct random *ptr0 = (struct random *) malloc(sizeof(struct random)*5);
+
+  int * ptr1 = (int *) malloc(sizeof(int)*10);
+
+  free(ptr0);
+
+  ptr0 = (struct random *) malloc(sizeof(struct random)*4);
+
+  free(ptr1);
+  free(ptr0);      
+
+OUTPUT TEST5.C
+       The purpose of this test is to see if malloc will create a new memEntry because we are freeing 
+       something of sizeof(struct random)*5 but and then hope to allocate something of sizeof(struct random)*4 
+       so there is free space in this reused block of size of the difference between the two
+
+       malloced new pointer at address 0x10b1a6a0f with size 2440
+       malloced new pointer at address 0x10b1a69c6 with size 40
+
+       we have successfully freed memEntry at 0x10b1a6a0f
+
+       Too much space. Created a new block at address 0x10b1a71d0 with size 456
+
+       malloced new pointer at address 0x10b1a6a0f with size 1952
+
+       we have successfully freed memEntry at 0x10b1a69c6
+       we have successfully freed memEntry at 0x10b1a6a0f
+
+
+
+
+
+
+
+
+
+
+INPUT TEST6.C
+  printf("The purpose of this test is to make sure that reallocation is working. If there is too much space, \nalso checking to see if it's creating a new empty memEntry, we are actually using that new empty memEntry here\n");
+
+  printf("size of struct random is %ld\n", sizeof(struct random));
+  struct random *ptr0 = (struct random *) malloc(sizeof(struct random)*5);
+
+  int * ptr1 = (int *) malloc(sizeof(int)*10);
+
+  free(ptr0);
+
+  ptr0 = (struct random *) malloc(sizeof(struct random)*4);
+  
+  int * ptr2 = (int *) malloc(sizeof(int)*15);
+
+  free(ptr2);
+  free(ptr1);
+  free(ptr0);
+
+
+OUTPUT TEST6.C
+
+       The purpose of this test is to make sure that reallocation is working. If there is too much space, 
+       also checking to see if it's creating a new empty memEntry, we are actually using that new empty memEntry here
+       size of struct random is 488
+
+       malloced new pointer at address 0x10ff07a0f with size 2440
+       malloced new pointer at address 0x10ff079c6 with size 40
+
+       we have successfully freed memEntry at 0x10ff07a0f
+       
+       Too much space. Created a new block at address 0x10ff081d0 with size 456
+       
+       malloced new pointer at address 0x10ff07a0f with size 1952
+       
+       Too much space. Created a new block at address 0x10ff0822d with size 363
+
+       malloced new pointer at address 0x10ff081d0 with size 60
+
+       we have successfully freed memEntry at 0x10ff081d0
+       we have successfully freed memEntry at 0x10ff079c6
+       we have successfully freed memEntry at 0x10ff07a0f
+
+
+
+
+
+
+
+
+INPUT TEST7.C
+  printf("The purpose of this test is to see what happens when you call free on a pointer that doesn't point to the beginning of a block\n");
+
+  int *ptr1 = (int *) malloc(sizeof(int)*2);
+  ptr1[0] = 34124;
+  ptr1[1] = 123124;
+
+  printf("values are %d %d\n", ptr1[0], ptr1[1]);
+
+  int *ptr2 = (int *) malloc(sizeof(int));
+  *ptr2 = 234235;
+
+  int *ptr = (int *) malloc(sizeof(int)*8);
+  int i;
+  for (i = 0; i < 8; i++)
+    {
+      ptr[i] = i;
+    }
+  for (i = 0; i < 8; i++)
+    {
+      printf("values are %d\n",ptr[i]);
+    }
+
+  int *ptr3 = (int *) malloc(sizeof(int)*3);
+  ptr3[1] = 0;
+  
+  free(ptr3+1);
+  free(ptr2+2);
+  free(ptr-1);
+  free(ptr1-100);
+
+OUTPUT TEST7.C
+
+       The purpose of this test is to see what happens when you call free on a pointer that doesn't point to the beginning of a block
+
+       malloced new pointer at address 0x10b68d030 with size 8
+
+       values are 34124 123124
+
+       malloced new pointer at address 0x10b68d059 with size 4
+
+       malloced new pointer at address 0x10b68e377 with size 32
+
+       values are 0
+       values are 1
+       values are 2
+       values are 3
+       values are 4
+       values are 5
+       values are 6
+       values are 7
+
+       malloced new pointer at address 0x10b68d4f9 with size 12
+
+       Unable to free block, pointer did not point to beginning of block at line 32 in file test7.c
+       Unable to free block, pointer did not point to beginning of block at line 33 in file test7.c
+       Unable to free block, pointer did not point to beginning of block at line 34 in file test7.c
+
+       User tried to free pointer that was not allocated by mymalloc at line 35 in file test7.c
+
+
+
+
+
+
+
+INPUT TEST8.C
+
+        printf("The purpose of this test is to see if we can make linked lists with our malloc function, are all the memory addresses correct?\n This allocates all data from the right till it fills up the whole capacity of the memblock");
+  struct random *ptr = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr->someArr, "PTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our [THAT WAS JUST A 400 BYTE STRING]");
+  int i;
+  for (i = 0; i < 20; i++)
+    {
+      ptr->anotherArr[i] = i*10;
+    }
+
+  struct random *ptr1 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr1->someArr, "PTR 1: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr1->anotherArr[i] = i*10;
+    }
+
+  struct random *ptr2 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr2->someArr, "PTR 2: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr2->anotherArr[i] = i*10;
+    }
+
+  struct random *ptr3 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr3->someArr, "PTR 3: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr3->anotherArr[i] = i*10;
+    }
+
+  struct random *ptr4 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr4->someArr, "PTR 4: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr4->anotherArr[i] = i*10;
+    }
+
+  struct random *ptr5 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr5->someArr, "PTR 5: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr5->anotherArr[i] = i*10;
+    }
+
+  struct random *ptr6 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr6->someArr, "PTR 6: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr6->anotherArr[i] = i*10;
+    }
+
+  struct random *ptr7 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr7->someArr, "PTR 7: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr7->anotherArr[i] = i*10;
+    }
+  
+  struct random *ptr8 = (struct random *) malloc(sizeof(struct random));
+  strcpy(ptr8->someArr, "PTR 8: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af");
+  for (i = 0; i < 20; i++)
+    {
+      ptr8->anotherArr[i] = i*10;
+    }
+ 
+  struct random *ptr9 = (struct random *) malloc(sizeof(struct random));
+
+  ptr->next = ptr1;
+  ptr1->next = ptr2;
+  ptr2->next = ptr3;
+  ptr3->next = ptr4;
+  ptr4->next = ptr5;
+  ptr5->next = ptr6;
+  ptr6->next = ptr7;
+  ptr7->next = ptr8;
+  ptr8->next = ptr9;
+
+  struct random *ptr10 = ptr;
+  i = 0;
+  while (ptr10 != NULL)
+    {
+      printf("Printing values for ptr%d\n at address %p", i, ptr10);
+      printf("%s\n", ptr10->someArr);
+      int j;
+      for (j = 0; j < 20; j++)
+      {
+        printf("%d ", ptr10->anotherArr[j]);
+	}
+      printf("\n\n");
+      ptr10 = ptr10->next;
+      i++;
+    }
+
+  printf("%ld\n",sizeof(struct random));
+
+  free(ptr9);
+  free(ptr8);
+  free(ptr7);
+  free(ptr6);
+  free(ptr5);
+  free(ptr4);
+  free(ptr3);
+  free(ptr2);
+  free(ptr1);
+  free(ptr);
+  free(ptr10);
+
+
+
+
+
+
+
+OUTPUT TEST8.C
+
+       The purpose of this test is to see if we can make linked lists with our malloc function, are all the memory addresses correct?
+        This allocates all data from the right till it fills up the whole capacity of the memblock
+
+	malloced new pointer at address 0x1054481af with size 488
+	malloced new pointer at address 0x105447fa6 with size 488
+	malloced new pointer at address 0x105447d9d with size 488
+	malloced new pointer at address 0x105447b94 with size 488
+	malloced new pointer at address 0x10544798b with size 488
+	malloced new pointer at address 0x105447782 with size 488
+	malloced new pointer at address 0x105447579 with size 488
+	malloced new pointer at address 0x105447370 with size 488
+	malloced new pointer at address 0x105447167 with size 488
+	Unable to allocate 488 bytes for malloc call at line 80 in file test8.c
+       
+       Printing values for ptr0
+        at address 0x1054481d0PTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our malloc implementation is okPTR: This is just a test, if this works, then I'm pretty sure that our [THAT WAS JUST A 400 BYTE STRING]
+	0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+	Printing values for ptr1
+	 at address 0x105447fc7PTR 1: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+	 0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+	Printing values for ptr2
+	 at address 0x105447dbePTR 2: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+	0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+	Printing values for ptr3
+	 at address 0x105447bb5PTR 3: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+	0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+	Printing values for ptr4
+	 at address 0x1054479acPTR 4: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+	0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+	Printing values for ptr5
+	 at address 0x1054477a3PTR 5: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+	0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+	Printing values for ptr6
+	 at address 0x10544759aPTR 6: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+	0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+	Printing values for ptr7
+	 at address 0x105447391PTR 7: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+	0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+	Printing values for ptr8
+	 at address 0x105447188PTR 8: This is just a test, if this works, then I'm pretty sure that our malloc implementation is solid af
+	0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 
+
+	488
+	User tried to free a NULL pointer at line 110 in file test8.c
+
+	we have successfully freed memEntry at 0x105447167
+	we have successfully freed memEntry at 0x105447370
+	we have successfully freed memEntry at 0x105447579
+	we have successfully freed memEntry at 0x105447782
+	we have successfully freed memEntry at 0x10544798b
+	we have successfully freed memEntry at 0x105447b94
+	we have successfully freed memEntry at 0x105447d9d
+	we have successfully freed memEntry at 0x105447fa6
+	we have successfully freed memEntry at 0x1054481af
+	
+	User tried to free a NULL pointer at line 120 in file test8.c
+
+
+
+
+
+
+
+
+INPUT TEST9.C
+  int p = 5;
+  int* ptr = (int*)malloc(sizeof(int));
+  ptr = &p;
+
+  free(ptr);
+
+OUTPUT TEST9.C
+       malloced new pointer at address 0x108155030 with size 4
+
+       User tried to free pointer that was not allocated by mymalloc at line 15 in file test9.c
+
+
+
+
+
+
+INPUT TEST10.C
+  something* ptr = malloc(sizeof(int));
+  ptr = initalize(3,'a');
+
+  something* ptr1 = initalize(1,'c');
+
+  free(ptr);
+  free(ptr1);
+
+OUTPUT TEST10.C
+       malloced new pointer at address 0x10f7f0030 with size 4
+
+       malloced new pointer at address 0x10f7f0055 with size 8
+
+       malloced new pointer at address 0x10f7f007e with size 8
+
+       we have successfully freed memEntry at 0x10f7f0055
+       
+       we have successfully freed memEntry at 0x10f7f007e
+
+
+
+
+
+
+
+INPUT TEST11.C
+  something* head = intialize(1, 1.23);
+
+  something* ptr1 = intialize(2, 1.34);
+  something* ptr2 = intialize(3, 4.34);
+  something* ptr3 = intialize(4, 4.234);
+
+  head->next = ptr1;
+  ptr1->next = ptr2;
+  ptr2->next = ptr3;
+
+
+  free(head);
+  free(ptr1);
+  free(ptr2);
+  free(ptr3);
+
+OUTPUT TEST11.C
+       malloced new pointer at address 0x103a1b030 with size 8
+
+       malloced new pointer at address 0x103a1b059 with size 8
+
+       malloced new pointer at address 0x103a1b082 with size 8
+
+       malloced new pointer at address 0x103a1b0ab with size 8
+
+       we have successfully freed memEntry at 0x103a1b030
+
+       we have successfully freed memEntry at 0x103a1b059
+
+       we have successfully freed memEntry at 0x103a1b082
+
+       we have successfully freed memEntry at 0x103a1b0ab
+
+
+
+
+INPUT TEST12.C
+
+  int * ptr = (int *) calloc(4, sizeof(int));
+  ptr[0] = 0;
+  ptr[1] = 1;
+  ptr[2] = 2;
+  ptr[3] = 3;
+
+  int i;
+  printf("values of ptr are ");
+  for (i = 0; i < 4; i++)
+    {
+      printf(" %d", ptr[i]);
+    }
+  printf("\n");
+  free(ptr);
+
+OUTPUT TEST12.C
+
+       malloced new pointer at address 0x102b10030 with size 16
+
+       values of ptr are  0 1 2 3
+       we have successfully freed memEntry at 0x102b10030
